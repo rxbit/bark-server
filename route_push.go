@@ -146,15 +146,38 @@ func push(c *fiber.Ctx, params map[string]interface{}) error {
 		return c.Status(400).JSON(failed(400, "device key is empty"))
 	}
 
-	deviceToken, err := db.DeviceTokenByKey(msg.DeviceKey)
-	if err != nil {
-		return c.Status(400).JSON(failed(400, "failed to get device token: %v", err))
-	}
-	msg.DeviceToken = deviceToken
-
-	err = apns.Push(&msg)
-	if err != nil {
-		return c.Status(500).JSON(failed(500, "push failed: %v", err))
+	// check DeviceKey starts with "G_"
+	if !strings.HasPrefix(msg.DeviceKey, "G_") {
+		deviceToken, err := db.DeviceTokenByKey(msg.DeviceKey)
+		if err != nil {
+			return c.Status(400).JSON(failed(400, "failed to get device token: %v", err))
+		}
+		msg.DeviceToken = deviceToken
+	
+		err = apns.Push(&msg)
+		if err != nil {
+			return c.Status(500).JSON(failed(500, "push failed: %v", err))
+		}
+    } else {
+		deviceKeys, err := db.GetDevicesByGroupKey(msg.DeviceKey)
+		if err != nil {
+			return c.Status(400).JSON(failed(400, "failed to get device alias: %v", err))
+		}
+	
+		if deviceKeys != nil {
+			for _, deviceKey := range deviceKeys{
+				msg.DeviceKey = deviceKey
+				deviceToken, err := db.DeviceTokenByKey(msg.DeviceKey)
+				if err != nil {
+					return c.Status(400).JSON(failed(400, "failed to get device token: %v", err))
+				}
+				msg.DeviceToken = deviceToken
+				err = apns.Push(&msg)
+				if err != nil {
+					return c.Status(500).JSON(failed(500, "push failed: %v", err))
+				}
+			}
+		}
 	}
 	return c.JSON(success())
 }

@@ -76,3 +76,11 @@ func (d *MySQL) SaveDeviceTokenByKey(key, token string) (string, error) {
 func (d *MySQL) Close() error {
 	return mysqlDB.Close()
 }
+
+func (d *MySQL) SaveGroupByKeys(group_key string, keys []string) (string, error) {
+	return "", nil
+}
+
+func (d *MySQL) GetDevicesByGroupKey(group_key string) ([]string, error) {
+	return nil, nil
+}

@@ -33,3 +33,11 @@ func (d *EnvBase) SaveDeviceTokenByKey(key, token string) (string, error) {
 func (d *EnvBase) Close() error {
 	return nil
 }
+
+func (d *EnvBase) SaveGroupByKeys(group_key string, keys []string) (string, error) {
+	return "", nil
+}
+
+func (d *EnvBase) GetDevicesByGroupKey(group_key string) ([]string, error) {
+	return nil, nil
+}
